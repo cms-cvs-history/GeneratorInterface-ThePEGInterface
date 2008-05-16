@@ -15,11 +15,11 @@ process.configurationMetadata = cms.untracked.PSet(
 	annotation = cms.untracked.string('ttbar')
 )
 
-process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-	moduleSeeds = cms.PSet(
-		generator = cms.untracked.uint32(123456789),
-		VtxSmeared = cms.untracked.uint32(98765432)
-	)
+process.load("Configuration.StandardSequences.Generator_cff")
+
+process.RandomNumberGeneratorService.moduleSeeds = cms.PSet(
+	generator = cms.untracked.uint32(123456789),
+	VtxSmeared = cms.untracked.uint32(98765432)
 )
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -51,7 +51,6 @@ process.filter = cms.EDFilter("LHEFilter",
 )
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
-process.load("Configuration.StandardSequences.Generator_cff")
 
 process.VtxSmeared.src = 'generator'
 process.genEventWeight.src = 'generator'

@@ -7,21 +7,16 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.configurationMetadata = cms.untracked.PSet(
 	version = cms.untracked.string('alpha'),
-	name = cms.untracked.string('LHEF input'),
-	annotation = cms.untracked.string('ttbar')
+	name = cms.untracked.string('ThePEG'),
+	annotation = cms.untracked.string('Herwig++ QCD')
 )
 
-process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-	sourceSeed = cms.untracked.uint32(123456789),
-	moduleSeeds = cms.PSet(
-		VtxSmeared = cms.untracked.uint32(98765432)
-	)
-)
+process.load("Configuration.StandardSequences.Generator_cff")
+
+process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
-
-process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
 
 process.source = cms.Source("ThePEGSource",
 	process.herwigDefaultsBlock,
@@ -60,7 +55,6 @@ process.source = cms.Source("ThePEGSource",
 )
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
-process.load("Configuration.StandardSequences.Generator_cff")
 
 process.genParticles.abortOnUnknownPDGCode = False
 
