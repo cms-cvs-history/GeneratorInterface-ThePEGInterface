@@ -72,14 +72,12 @@ process.genParticleCandidates.src = 'generator'
 
 process.genParticles.abortOnUnknownPDGCode = False
 
-process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
-
 process.p0 = cms.Path(
 	process.generator *
 	process.pgen
 )
 
-process.load("Configuration.EventContent.EventContent_cff")
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 process.printList = cms.EDFilter("ParticleListDrawer",
 	src = cms.InputTag("genParticles"),
@@ -100,6 +98,8 @@ process.p = cms.Path(
 	process.printTree *
 	process.printList
 )
+
+process.load("Configuration.EventContent.EventContent_cff")
 
 process.GEN = cms.OutputModule("PoolOutputModule",
 	process.FEVTSIMEventContent,
