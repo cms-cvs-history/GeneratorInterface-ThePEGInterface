@@ -46,10 +46,6 @@ process.generator = cms.EDProducer("LHEProducer",
 	)
 )
 
-process.filter = cms.EDFilter("LHEFilter",
-	src = cms.InputTag("generator")
-)
-
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
 
 process.VtxSmeared.src = 'generator'
@@ -63,7 +59,6 @@ process.genParticles.abortOnUnknownPDGCode = False
 
 process.p0 = cms.Path(
 	process.generator *
-	process.filter *
 	process.pgen
 )
 
