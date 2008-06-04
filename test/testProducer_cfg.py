@@ -15,9 +15,9 @@ process.configurationMetadata = cms.untracked.PSet(
 
 process.load("Configuration.StandardSequences.Generator_cff")
 
-process.RandomNumberGeneratorService.moduleSeeds = cms.PSet(
-	generator = cms.untracked.uint32(123456789),
-	VtxSmeared = cms.untracked.uint32(98765432)
+process.RandomNumberGeneratorService.generator = cms.PSet(
+	initialSeed = cms.untracked.uint32(123456789),
+	engineName = cms.untracked.string('HepJamesRandom')
 )
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -106,6 +106,7 @@ process.GEN = cms.OutputModule("PoolOutputModule",
 	dataset = cms.untracked.PSet(dataTier = cms.untracked.string('GEN')),
 	fileName = cms.untracked.string('test.root')
 )
+process.GEN.outputCommands.append('keep *_generator_*_*')
 
 process.outpath = cms.EndPath(process.GEN)
 
