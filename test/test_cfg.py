@@ -1,4 +1,4 @@
-#!/bin/env cmsRun
+#!/usr/bin/env cmsRun
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Gen")
@@ -34,7 +34,6 @@ process.source = cms.Source("ThePEGSource",
 
 	parameterSets = cms.vstring(
 		'cmsDefaults',
-		'disableCtau10mmDecays',
 #		'mssm',
 		'validation'
 	),
