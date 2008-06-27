@@ -39,6 +39,7 @@ process.generator = cms.EDProducer("LHEProducer",
 
 		parameterSets = cms.vstring(
 			'cmsDefaults', 
+			'disableCtau10mmDecays',
 			'lheDefaults', 
 			'lheDefaultPDFs'
 		)
@@ -69,7 +70,7 @@ process.load("Configuration.StandardSequences.Simulation_cff")
 process.load("Configuration.StandardSequences.MixingNoPileUp_cff")
 
 process.g4SimHits.Generator.HepMCProductLabel = 'generator'
-process.trackingtruthprod.HepMCDataLabels.append('generator')
+#process.trackingtruthprod.HepMCDataLabels.append('generator')
 
 process.load("Configuration.StandardSequences.L1Emulator_cff")
 process.load("Configuration.StandardSequences.DigiToRaw_cff")

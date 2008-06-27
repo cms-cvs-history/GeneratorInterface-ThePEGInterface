@@ -3,16 +3,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Gen")
 
-process.source = cms.Source("LHESource",
-	fileNames = cms.untracked.vstring('file:ttbar.lhe')
-)
-
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.configurationMetadata = cms.untracked.PSet(
 	version = cms.untracked.string('alpha'),
-	name = cms.untracked.string('LHEF input'),
-	annotation = cms.untracked.string('ttbar')
+	name = cms.untracked.string('ThePEG'),
+	annotation = cms.untracked.string('Herwig++ QCD')
 )
 
 process.load("Configuration.StandardSequences.Generator_cff")
@@ -27,40 +23,48 @@ process.MessageLogger.cerr.threshold = 'INFO'
 
 process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
 
-process.generator = cms.EDProducer("LHEProducer",
+process.source = cms.Source("ThePEGSource",
+	process.herwigDefaultsBlock,
+
 	eventsToPrint = cms.untracked.uint32(1),
 
-	hadronisation = cms.PSet(
-		process.herwigDefaultsBlock,
+	configFiles = cms.vstring(
+#		'MSSM.model'
+	),
 
-		generator = cms.string('ThePEG'),
+	parameterSets = cms.vstring(
+		'cmsDefaults',
+		'disableCtau10mmDecays',
+#		'mssm',
+		'validation'
+	),
 
-		configFiles = cms.vstring(),
+	mssm = cms.vstring(
+		'cd /Herwig/NewPhysics',
+		'set HPConstructor:IncludeEW No',
+		'set TwoBodyDC:CreateDecayModes No',
+		'setup MSSM/Model ${HERWIGPATH}/SPhenoSPS1a.spc',
+		'insert NewModel:DecayParticles 0 /Herwig/Particles/~d_L',
+		'insert NewModel:DecayParticles 1 /Herwig/Particles/~u_L',
+		'insert NewModel:DecayParticles 2 /Herwig/Particles/~e_R-',
+		'insert NewModel:DecayParticles 3 /Herwig/Particles/~mu_R-',
+		'insert NewModel:DecayParticles 4 /Herwig/Particles/~chi_10',
+		'insert NewModel:DecayParticles 5 /Herwig/Particles/~chi_20',
+		'insert NewModel:DecayParticles 6 /Herwig/Particles/~chi_2+'
+	),
 
-		parameterSets = cms.vstring(
-			'cmsDefaults', 
-			'disableCtau10mmDecays',
-			'lheDefaults', 
-			'lheDefaultPDFs'
-		)
+	validation = cms.vstring(
+		'cd /Herwig/MatrixElements/',
+		'insert SimpleQCD:MatrixElements[0] MEQCD2to2',
+		'set /Herwig/Cuts/QCDCuts:MHatMin 20.*GeV'
 	)
 )
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
 
-process.VtxSmeared.src = 'generator'
-process.genEventWeight.src = 'generator'
-process.genEventScale.src = 'generator'
-process.genEventPdfInfo.src = 'generator'
-process.genParticles.src = 'generator'
-process.genParticleCandidates.src = 'generator'
-
 process.genParticles.abortOnUnknownPDGCode = False
 
-process.p0 = cms.Path(
-	process.generator *
-	process.pgen
-)
+process.p0 = cms.Path(process.pgen)
 
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
@@ -91,8 +95,6 @@ process.GEN = cms.OutputModule("PoolOutputModule",
 	dataset = cms.untracked.PSet(dataTier = cms.untracked.string('GEN')),
 	fileName = cms.untracked.string('test.root')
 )
-process.GEN.outputCommands.append('keep *_source_*_*')
-process.GEN.outputCommands.append('keep *_generator_*_*')
 
 process.outpath = cms.EndPath(process.GEN)
 

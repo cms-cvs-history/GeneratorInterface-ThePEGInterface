@@ -36,6 +36,7 @@ process.generator = cms.EDProducer("ThePEGProducer",
 
 	parameterSets = cms.vstring(
 		'cmsDefaults', 
+		'disableCtau10mmDecays',
 #		'mssm',
 		'validation'
 	),
