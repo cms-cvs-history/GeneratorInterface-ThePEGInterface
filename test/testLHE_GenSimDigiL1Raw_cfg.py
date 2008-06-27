@@ -39,7 +39,6 @@ process.generator = cms.EDProducer("LHEProducer",
 
 		parameterSets = cms.vstring(
 			'cmsDefaults', 
-			'disableCtau10mmDecays',
 			'lheDefaults', 
 			'lheDefaultPDFs'
 		)
