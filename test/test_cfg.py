@@ -13,11 +13,6 @@ process.configurationMetadata = cms.untracked.PSet(
 
 process.load("Configuration.StandardSequences.Generator_cff")
 
-process.RandomNumberGeneratorService.generator = cms.PSet(
-	initialSeed = cms.untracked.uint32(123456789),
-	engineName = cms.untracked.string('HepJamesRandom')
-)
-
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 
