@@ -22,6 +22,7 @@ process.source = cms.Source("ThePEGSource",
 	process.herwigDefaultsBlock,
 
 	eventsToPrint = cms.untracked.uint32(1),
+	configDump  = cms.untracked.string("LHC.in"),
 
 	configFiles = cms.vstring(
 #		'MSSM.model'
