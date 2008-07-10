@@ -11,7 +11,7 @@ process.configurationMetadata = cms.untracked.PSet(
 	annotation = cms.untracked.string('Herwig++ QCD')
 )
 
-process.load("Configuration.StandardSequences.Generator_cff")
+process.load("Configuration.StandardSequences.Services_cff")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
@@ -58,6 +58,8 @@ process.source = cms.Source("ThePEGSource",
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
 
 process.genParticles.abortOnUnknownPDGCode = False
+
+process.load("Configuration.StandardSequences.Generator_cff")
 
 process.p0 = cms.Path(process.pgen)
 

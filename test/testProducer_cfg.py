@@ -13,7 +13,7 @@ process.configurationMetadata = cms.untracked.PSet(
 	annotation = cms.untracked.string('ttbar')
 )
 
-process.load("Configuration.StandardSequences.Generator_cff")
+process.load("Configuration.StandardSequences.Services_cff")
 
 process.RandomNumberGeneratorService.generator = cms.PSet(
 	initialSeed = cms.untracked.uint32(123456789),
@@ -71,6 +71,8 @@ process.genParticles.src = 'generator'
 process.genParticleCandidates.src = 'generator'
 
 process.genParticles.abortOnUnknownPDGCode = False
+
+process.load("Configuration.StandardSequences.Generator_cff")
 
 process.p0 = cms.Path(
 	process.generator *
