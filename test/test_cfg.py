@@ -22,7 +22,7 @@ process.source = cms.Source("ThePEGSource",
 	process.herwigDefaultsBlock,
 
 	eventsToPrint = cms.untracked.uint32(1),
-	configDump  = cms.untracked.string(""),
+	dumpConfig  = cms.untracked.string(""),
 
 	configFiles = cms.vstring(
 #		'MSSM.model'
