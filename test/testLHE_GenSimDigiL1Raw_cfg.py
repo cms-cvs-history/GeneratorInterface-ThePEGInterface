@@ -3,20 +3,15 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("GenSimDigiL1Raw")
 
-process.source = cms.Source("LHESource",
-	fileNames = cms.untracked.vstring('file:ttbar.lhe')
-)
-
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.configurationMetadata = cms.untracked.PSet(
-	version = cms.untracked.string("alpha"),
-	name = cms.untracked.string("LHEF input"),
-	annotation = cms.untracked.string("ttbar")
+	version = cms.untracked.string('alpha'),
+	name = cms.untracked.string('ThePEG'),
+	annotation = cms.untracked.string('Herwig++ ttbar via LHE')
 )
 
 process.load("Configuration.StandardSequences.Services_cff")
-
 process.RandomNumberGeneratorService.generator = cms.PSet(
 	initialSeed = cms.untracked.uint32(123456789),
 	engineName = cms.untracked.string('HepJamesRandom')
@@ -26,9 +21,14 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 
 process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
+process.source = cms.Source("LHESource",
+	fileNames = cms.untracked.vstring('file:ttbar.lhe')
+)
 
 process.generator = cms.EDProducer("LHEProducer",
 	eventsToPrint = cms.untracked.uint32(1),
+	dumpConfig  = cms.untracked.string(""),
+	dumpEvents  = cms.untracked.string(""),
 
 	hadronisation = cms.PSet(
 		process.herwigDefaultsBlock,
@@ -45,23 +45,43 @@ process.generator = cms.EDProducer("LHEProducer",
 	)
 )
 
+process.load("Configuration.StandardSequences.VtxSmearedBetafuncEarlyCollision_cff")
+process.VtxSmeared.src = 'generator'
+
 process.load("Configuration.StandardSequences.Generator_cff")
+process.genParticles.abortOnUnknownPDGCode = False
+process.genParticles.src = 'generator'
+process.genParticleCandidates.src = 'generator'
+process.genEventWeight.src = 'generator'
+process.genEventScale.src = 'generator'
+process.genEventPdfInfo.src = 'generator'
 
 process.p0 = cms.Path(
 	process.generator *
 	process.pgen
 )
 
-process.load("Configuration.StandardSequences.VtxSmearedBetafuncEarlyCollision_cff")
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
-process.VtxSmeared.src = 'generator'
-process.genEventWeight.src = 'generator'
-process.genEventScale.src = 'generator'
-process.genEventPdfInfo.src = 'generator'
-process.genParticles.src = 'generator'
-process.genParticleCandidates.src = 'generator'
+process.printList = cms.EDFilter("ParticleListDrawer",
+	src = cms.InputTag("genParticles"),
+	maxEventsToPrint = cms.untracked.int32(-1)
+)
 
-process.genParticles.abortOnUnknownPDGCode = False
+process.printTree = cms.EDFilter("ParticleTreeDrawer",
+	src = cms.InputTag("genParticles"),
+	printP4 = cms.untracked.bool(False),
+	printPtEtaPhi = cms.untracked.bool(True),
+	printVertex = cms.untracked.bool(False),
+	printStatus = cms.untracked.bool(True),
+	printIndex = cms.untracked.bool(True),
+	status = cms.untracked.vint32(1, 2, 3)
+)
+
+process.p = cms.Path(
+	process.printTree *
+	process.printList
+)
 
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")

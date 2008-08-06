@@ -12,17 +12,21 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 process.load("Configuration.StandardSequences.Services_cff")
+process.RandomNumberGeneratorService.generator = cms.PSet(
+	initialSeed = cms.untracked.uint32(123456789),
+	engineName = cms.untracked.string('HepJamesRandom')
+)
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 
 process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
-
 process.source = cms.Source("ThePEGSource",
 	process.herwigDefaultsBlock,
 
 	eventsToPrint = cms.untracked.uint32(1),
 	dumpConfig  = cms.untracked.string(""),
+	dumpEvents  = cms.untracked.string(""),
 
 	configFiles = cms.vstring(
 #		'MSSM.model'
@@ -57,11 +61,12 @@ process.source = cms.Source("ThePEGSource",
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
 
+process.load("Configuration.StandardSequences.Generator_cff")
 process.genParticles.abortOnUnknownPDGCode = False
 
-process.load("Configuration.StandardSequences.Generator_cff")
-
-process.p0 = cms.Path(process.pgen)
+process.p0 = cms.Path(
+	process.pgen
+)
 
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
@@ -92,7 +97,12 @@ process.GEN = cms.OutputModule("PoolOutputModule",
 	dataset = cms.untracked.PSet(dataTier = cms.untracked.string('GEN')),
 	fileName = cms.untracked.string('test.root')
 )
+process.GEN.outputCommands.append('keep *_source_*_*')
+process.GEN.outputCommands.append('keep *_generator_*_*')
 
 process.outpath = cms.EndPath(process.GEN)
 
-process.schedule = cms.Schedule(process.p0, process.outpath)
+process.schedule = cms.Schedule(
+	process.p0,
+	process.outpath
+)

@@ -1,22 +1,17 @@
-#!/bin/env cmsRun
+#!/usr/bin/env cmsRun
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Gen")
 
-process.source = cms.Source("LHESource",
-	fileNames = cms.untracked.vstring('file:ttbar.lhe')
-)
-
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 process.configurationMetadata = cms.untracked.PSet(
 	version = cms.untracked.string('alpha'),
-	name = cms.untracked.string('LHEF input'),
-	annotation = cms.untracked.string('ttbar')
+	name = cms.untracked.string('ThePEG'),
+	annotation = cms.untracked.string('Herwig++ ttbar via LHE')
 )
 
 process.load("Configuration.StandardSequences.Services_cff")
-
 process.RandomNumberGeneratorService.generator = cms.PSet(
 	initialSeed = cms.untracked.uint32(123456789),
 	engineName = cms.untracked.string('HepJamesRandom')
@@ -26,9 +21,14 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = 'INFO'
 
 process.load("GeneratorInterface.ThePEGInterface.herwigDefaults_cff")
+process.source = cms.Source("LHESource",
+	fileNames = cms.untracked.vstring('file:ttbar.lhe')
+)
 
 process.generator = cms.EDProducer("LHEProducer",
 	eventsToPrint = cms.untracked.uint32(1),
+	dumpConfig  = cms.untracked.string(""),
+	dumpEvents  = cms.untracked.string(""),
 
 	hadronisation = cms.PSet(
 		process.herwigDefaultsBlock,
@@ -46,17 +46,15 @@ process.generator = cms.EDProducer("LHEProducer",
 )
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
-
 process.VtxSmeared.src = 'generator'
+
+process.load("Configuration.StandardSequences.Generator_cff")
+process.genParticles.abortOnUnknownPDGCode = False
+process.genParticles.src = 'generator'
+process.genParticleCandidates.src = 'generator'
 process.genEventWeight.src = 'generator'
 process.genEventScale.src = 'generator'
 process.genEventPdfInfo.src = 'generator'
-process.genParticles.src = 'generator'
-process.genParticleCandidates.src = 'generator'
-
-process.genParticles.abortOnUnknownPDGCode = False
-
-process.load("Configuration.StandardSequences.Generator_cff")
 
 process.p0 = cms.Path(
 	process.generator *
@@ -97,4 +95,7 @@ process.GEN.outputCommands.append('keep *_generator_*_*')
 
 process.outpath = cms.EndPath(process.GEN)
 
-process.schedule = cms.Schedule(process.p0, process.outpath)
+process.schedule = cms.Schedule(
+	process.p0,
+	process.outpath
+)
