@@ -19,9 +19,9 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.6 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('Herwig++ example - QCD events, MRST2001 used, MinKT=1400 GeV'),
-    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/GenProduction/python/Herwigpp_base_cff.py,v $')
+    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGSource_py_GEN_IDEAL_V5.py,v $')
 )
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -155,7 +155,7 @@ process.schedule = cms.Schedule(process.generation_step,process.out_step)
 # Automatic addition of the customisation function
 
 def customise(process):
-	process.RandomNumberGeneratorService.generator = cms.PSet(
+	process.RandomNumberGeneratorService.theSource = cms.PSet(
 		initialSeed = cms.untracked.uint32(123456789),
 		engineName = cms.untracked.string('HepJamesRandom')
 	)
