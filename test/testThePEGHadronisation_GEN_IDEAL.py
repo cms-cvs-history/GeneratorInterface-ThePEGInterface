@@ -1,7 +1,8 @@
 # Auto generated configuration file
 # using: 
-# Revision: 1.57 
+# Revision: 1.108 
 # Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
+## with command line options: GeneratorInterface/ThePEGInterface/testThePEGHadronisation -s GEN:ProducerSourceSequence --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_30X::All --no_exec --customise=GeneratorInterface/ThePEGInterface/customProducer
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('GEN')
@@ -9,19 +10,19 @@ process = cms.Process('GEN')
 # import of standard configurations
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('FWCore/MessageService/MessageLogger_cfi')
-process.load('Configuration/StandardSequences/Generator_cff')
 process.load('Configuration/StandardSequences/MixingNoPileUp_cff')
-process.load('Configuration/StandardSequences/GeometryPilot2_cff')
-process.load('Configuration/StandardSequences/MagneticField_cff')
+process.load('Configuration/StandardSequences/GeometryIdeal_cff')
+process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/Generator_cff')
 process.load('Configuration/StandardSequences/VtxSmearedEarly10TeVCollision_cff')
-process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+process.load('Configuration/StandardSequences/EndOfProcess_cff')
+#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.6 $'),
+    version = cms.untracked.string('$Revision: 1.1 $'),
     annotation = cms.untracked.string('LHE example - ttbar events, MRST2001 used, MinKT=1400 GeV'),
-    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/GenProduction/python/Herwigpp_base_cff.py,v $')
+    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGHadronisation.py,v $')
 )
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -37,7 +38,7 @@ process.source = cms.Source("LHESource",
 # Output definition
 process.output = cms.OutputModule("PoolOutputModule",
     outputCommands = process.RAWSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('testThePEGHadronisation_py_GEN.root'),
+    fileName = cms.untracked.string('testThePEGHadronisation_GEN.root'),
     dataset = cms.untracked.PSet(
         dataTier = cms.untracked.string('GEN'),
         filterName = cms.untracked.string('')
@@ -47,8 +48,10 @@ process.output = cms.OutputModule("PoolOutputModule",
     )
 )
 
+# Additional output definition
+
 # Other statements
-process.GlobalTag.globaltag = 'IDEAL_V5::All'
+#process.GlobalTag.globaltag = 'IDEAL_30X::All'
 process.generator = cms.EDProducer("LHEProducer",
     eventsToPrint = cms.untracked.uint32(1),
     hadronisation = cms.PSet(
@@ -86,20 +89,23 @@ process.generator = cms.EDProducer("LHEProducer",
             'set LHCGenerator:EventHandler /Herwig/EventHandlers/LHEHandler', 
             'cd /'),
         cmsDefaults = cms.vstring('+basicSetup', 
-            '+pdfCTEQ6L1', 
             '+cm14TeV', 
+            '+pdfMRST2001', 
             '+setParticlesStableForDetector'),
         lheDefaultPDFs = cms.vstring('cd /Herwig/EventHandlers', 
             'set LHEReader:PDFA /LHAPDF/cmsPDFSet', 
             'set LHEReader:PDFB /LHAPDF/cmsPDFSet', 
             'cd /'),
+        pdfMRST2001 = cms.vstring(''),
         generatorModule = cms.string('/Herwig/Generators/LHCGenerator'),
         eventHandlers = cms.string('/Herwig/EventHandlers'),
         basicSetup = cms.vstring('cd /Herwig/Generators', 
+            'create ThePEG::RandomEngineGlue /Herwig/RandomGlue', 
             'set LHCGenerator:NumberOfEvents 10000000', 
             'set LHCGenerator:DebugLevel 1', 
             'set LHCGenerator:PrintEvent 0', 
             'set LHCGenerator:MaxErrors 10000', 
+            'set LHCGenerator:RandomNumberGenerator /Herwig/RandomGlue', 
             'cd /'),
         setParticlesStableForDetector = cms.vstring('cd /Herwig/Particles', 
             'set mu-:Stable Stable', 
@@ -144,34 +150,53 @@ process.generator = cms.EDProducer("LHEProducer",
 process.ProducerSourceSequence = cms.Sequence(process.generator)
 
 # Path and EndPath definitions
-process.generation_step = cms.Path(process.ProducerSourceSequence*process.pgen)
+process.generation_step = cms.Path(process.pgen)
+process.endjob_step = cms.Path(process.endOfProcess)
 process.out_step = cms.EndPath(process.output)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.generation_step,process.out_step)
+process.schedule = cms.Schedule(process.generation_step,process.endjob_step,process.out_step)
+
+# special treatment in case of production filter sequence  
+for path in process.paths: 
+    getattr(process,path)._seq = process.ProducerSourceSequence*getattr(process,path)._seq
 
 
 # Automatic addition of the customisation function
 from GeneratorInterface.ThePEGInterface.herwigDefaults_cff import *
 
 def customise(process):
-	process.RandomNumberGeneratorService.generator = cms.PSet(
-		initialSeed = cms.untracked.uint32(123456789),
-		engineName = cms.untracked.string('HepJamesRandom')
-	)
+	process.RandomNumberGeneratorService.generator = \
+		process.RandomNumberGeneratorService.theSource
 
-	process.genParticles.abortOnUnknownPDGCode = False
-	process.genParticles.src = 'generator'
-	process.genParticleCandidates.src = 'generator'
-	process.genEventWeight.src = 'generator'
-	process.genEventScale.src = 'generator'
-	process.genEventPdfInfo.src = 'generator'
+	for i in [
+		'genParticles.src',
+		'genParticleCandidates.src',
+		'genEventWeight.src',
+		'genEventScale.src',
+		'genEventPdfInfo.src',
+		'genEventProcID.src',
+		'VtxSmeared.src',
+		'g4SimHits.Generator.HepMCProductLabel',
+		'famosSimHits.SourceLabel'
+	]:
+		try:
+			obj = reduce(lambda x, y: getattr(x, y),
+			             i.split('.')[:-1], process)
+			setattr(obj, i.split('.')[-1], 'generator')
+		except:
+			pass
 
-	process.VtxSmeared.src = 'generator'
+        try:
+                process.mergedtruth.HepMCDataLabels.append('generator')
+        except:
+                pass
 
 	process.output.outputCommands.append('keep *_generator_*_*')
 
-	return(process)
+	process.genParticles.abortOnUnknownPDGCode = False
+
+	return process
 
 
 # End of customisation function definition
