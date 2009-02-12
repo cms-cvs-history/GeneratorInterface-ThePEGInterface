@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.108 
 # Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-## with command line options: GeneratorInterface/ThePEGInterface/testThePEGSource -s GEN --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_30X::All --no_exec --customise=GeneratorInterface/ThePEGInterface/customSource
+# with command line options: GeneratorInterface/ThePEGInterface/testThePEGSource -s GEN --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_30X::All --no_exec --customise=GeneratorInterface/ThePEGInterface/customSource
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('GEN')
@@ -16,11 +16,11 @@ process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/Generator_cff')
 process.load('Configuration/StandardSequences/VtxSmearedEarly10TeVCollision_cff')
 process.load('Configuration/StandardSequences/EndOfProcess_cff')
-#process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.1 $'),
+    version = cms.untracked.string('$Revision: 1.2 $'),
     annotation = cms.untracked.string('Herwig++ example - QCD events, MRST2001 used, MinKT=1400 GeV'),
     name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGSource.py,v $')
 )
@@ -44,17 +44,13 @@ process.source = cms.Source("ThePEGSource",
         'create ThePEG::LHAPDF CTEQ5L', 
         'set CTEQ5L:PDFName cteq5l.LHgrid', 
         'set CTEQ5L:RemnantHandler /Herwig/Partons/HadronRemnants', 
-        'cp CTEQ5L cmsPDFSet', 
-        'set /Herwig/Particles/p+:PDF cmsPDFSet', 
-        'set /Herwig/Particles/pbar-:PDF cmsPDFSet', 
+        'cp CTEQ5L /cmsPDFSet', 
         'cd /'),
     lheDefaults = cms.vstring('cd /Herwig/Cuts', 
         'create ThePEG::Cuts NoCuts', 
         'cd /Herwig/EventHandlers', 
         'create ThePEG::LesHouchesInterface LHEReader', 
         'set LHEReader:Cuts /Herwig/Cuts/NoCuts', 
-        'set LHEReader:PDFA /LHAPDF/cmsPDFSet', 
-        'set LHEReader:PDFB /LHAPDF/cmsPDFSet', 
         'create ThePEG::LesHouchesEventHandler LHEHandler', 
         'set LHEHandler:WeightOption VarWeight', 
         'set LHEHandler:PartonExtractor /Herwig/Partons/QCDExtractor', 
@@ -65,24 +61,27 @@ process.source = cms.Source("ThePEGSource",
         'cd /Herwig/Generators', 
         'set LHCGenerator:EventHandler /Herwig/EventHandlers/LHEHandler', 
         'cd /'),
-    cmsDefaults = cms.vstring('+basicSetup', 
+    cmsDefaults = cms.vstring('+pdfMRST2001', 
+        '+basicSetup', 
         '+cm14TeV', 
-        '+pdfMRST2001', 
         '+setParticlesStableForDetector'),
     lheDefaultPDFs = cms.vstring('cd /Herwig/EventHandlers', 
-        'set LHEReader:PDFA /LHAPDF/cmsPDFSet', 
-        'set LHEReader:PDFB /LHAPDF/cmsPDFSet', 
+        'set LHEReader:PDFA /cmsPDFSet', 
+        'set LHEReader:PDFB /cmsPDFSet', 
         'cd /'),
-    pdfMRST2001 = cms.vstring(''),
+    pdfMRST2001 = cms.vstring('cp /Herwig/Partons/MRST /cmsPDFSet'),
     generatorModule = cms.string('/Herwig/Generators/LHCGenerator'),
     eventHandlers = cms.string('/Herwig/EventHandlers'),
     basicSetup = cms.vstring('cd /Herwig/Generators', 
         'create ThePEG::RandomEngineGlue /Herwig/RandomGlue', 
+        'set LHCGenerator:RandomNumberGenerator /Herwig/RandomGlue', 
         'set LHCGenerator:NumberOfEvents 10000000', 
         'set LHCGenerator:DebugLevel 1', 
         'set LHCGenerator:PrintEvent 0', 
         'set LHCGenerator:MaxErrors 10000', 
-        'set LHCGenerator:RandomNumberGenerator /Herwig/RandomGlue', 
+        'cd /Herwig/Particles', 
+        'set p+:PDF /cmsPDFSet', 
+        'set pbar-:PDF /cmsPDFSet', 
         'cd /'),
     setParticlesStableForDetector = cms.vstring('cd /Herwig/Particles', 
         'set mu-:Stable Stable', 
@@ -111,9 +110,7 @@ process.source = cms.Source("ThePEGSource",
         'create ThePEG::LHAPDF CTEQ6L1', 
         'set CTEQ6L1:PDFName cteq6ll.LHpdf', 
         'set CTEQ6L1:RemnantHandler /Herwig/Partons/HadronRemnants', 
-        'cp CTEQ6L1 cmsPDFSet', 
-        'set /Herwig/Particles/p+:PDF cmsPDFSet', 
-        'set /Herwig/Particles/pbar-:PDF cmsPDFSet', 
+        'cp CTEQ6L1 /cmsPDFSet', 
         'cd /'),
     eventsToPrint = cms.untracked.uint32(1),
     dumpConfig = cms.untracked.string(''),
@@ -126,10 +123,7 @@ process.source = cms.Source("ThePEGSource",
     filterEfficiency = cms.untracked.double(1.0),
     configFiles = cms.vstring(),
     crossSection = cms.untracked.double(1.84505e-07),
-    parameterSets = cms.vstring('basicSetup', 
-        'cm10TeV', 
-        'pdfMRST2001', 
-        'setParticlesStableForDetector', 
+    parameterSets = cms.vstring('cmsDefaults', 
         'QCDParameters')
 )
 
@@ -149,7 +143,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-#process.GlobalTag.globaltag = 'IDEAL_30X::All'
+process.GlobalTag.globaltag = 'IDEAL_30X::All'
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
