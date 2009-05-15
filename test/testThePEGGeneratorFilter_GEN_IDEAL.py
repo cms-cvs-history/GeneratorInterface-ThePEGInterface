@@ -20,9 +20,9 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.1 $'),
+    version = cms.untracked.string('$Revision: 1.3 $'),
     annotation = cms.untracked.string('Herwig++ example - QCD events, MRST2001 used, MinKT=1400 GeV'),
-    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGGeneratorFilter.py,v $')
+    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGGeneratorFilter_GEN_IDEAL.py,v $')
 )
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -83,7 +83,6 @@ process.generator = cms.EDProducer("ThePEGGeneratorFilter",
         'set Evolver:HardVetoScaleSource Read', 
         'set Evolver:MECorrMode No', 
         'cd /'),
-    usePthatEventScale = cms.bool(True),
     cmsDefaults = cms.vstring('+pdfMRST2001', 
         '+basicSetup', 
         '+cm14TeV', 
