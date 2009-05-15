@@ -1,8 +1,8 @@
 # Auto generated configuration file
 # using: 
-# Revision: 1.108 
+# Revision: 1.115 
 # Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-# with command line options: GeneratorInterface/ThePEGInterface/testThePEGHadronisation -s GEN:ProducerSourceSequence,SIM,DIGI,L1,DIGI2RAW,HLT --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_30X::All --no_exec --customise=GeneratorInterface/ThePEGInterface/customProducer
+# with command line options: Configuration/GenProduction/testThePEGHadronisation -s GEN:ProductionFilterSequence,SIM,DIGI,L1,DIGI2RAW,HLT --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_31X::All --no_exec --mc --customise=Configuration/GenProduction/custom
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('HLT')
@@ -18,7 +18,6 @@ process.load('Configuration/StandardSequences/VtxSmearedEarly10TeVCollision_cff'
 process.load('Configuration/StandardSequences/Sim_cff')
 process.load('Configuration/StandardSequences/Digi_cff')
 process.load('Configuration/StandardSequences/SimL1Emulator_cff')
-process.load('Configuration/StandardSequences/L1TriggerDefaultMenu_cff')
 process.load('Configuration/StandardSequences/DigiToRaw_cff')
 process.load('Configuration/StandardSequences/HLTtable_cff')
 process.load('Configuration/StandardSequences/EndOfProcess_cff')
@@ -26,7 +25,7 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.1 $'),
+    version = cms.untracked.string('$Revision: 1.2 $'),
     annotation = cms.untracked.string('LHE example - ttbar events, MRST2001 used'),
     name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGHadronisation.py,v $')
 )
@@ -57,7 +56,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.GlobalTag.globaltag = 'IDEAL_30X::All'
+process.GlobalTag.globaltag = 'IDEAL_31X::All'
 process.generator = cms.EDProducer("LHEProducer",
     eventsToPrint = cms.untracked.uint32(1),
     hadronisation = cms.PSet(
@@ -89,7 +88,11 @@ process.generator = cms.EDProducer("LHEProducer",
             'insert LHEHandler:LesHouchesReaders 0 LHEReader', 
             'cd /Herwig/Generators', 
             'set LHCGenerator:EventHandler /Herwig/EventHandlers/LHEHandler', 
+            'cd /Herwig/Shower', 
+            'set Evolver:HardVetoScaleSource Read', 
+            'set Evolver:MECorrMode No', 
             'cd /'),
+        usePthatEventScale = cms.bool(True),
         cmsDefaults = cms.vstring('+pdfMRST2001', 
             '+basicSetup', 
             '+cm14TeV', 
@@ -141,9 +144,27 @@ process.generator = cms.EDProducer("LHEProducer",
             'set CTEQ6L1:RemnantHandler /Herwig/Partons/HadronRemnants', 
             'cp CTEQ6L1 /cmsPDFSet', 
             'cd /'),
+        eventsToPrint = cms.untracked.uint32(1),
+        dumpConfig = cms.untracked.string('dump.config'),
+        dumpEvents = cms.untracked.string('dump.hepmc'),
+        validationQCD = cms.vstring('cd /Herwig/MatrixElements/', 
+            'insert SimpleQCD:MatrixElements[0] MEQCD2to2', 
+            'cd /', 
+            'set /Herwig/Cuts/JetKtCut:MinKT 50*GeV', 
+            'set /Herwig/Cuts/JetKtCut:MaxKT 51*GeV', 
+            'set /Herwig/UnderlyingEvent/MPIHandler:Algorithm 1'),
+        validationMSSM = cms.vstring('cd /Herwig/NewPhysics', 
+            'set HPConstructor:IncludeEW No', 
+            'set TwoBodyDC:CreateDecayModes No', 
+            'setup MSSM/Model ${HERWIGPATH}/SPhenoSPS1a.spc', 
+            'insert NewModel:DecayParticles 0 /Herwig/Particles/~d_L', 
+            'insert NewModel:DecayParticles 1 /Herwig/Particles/~u_L', 
+            'insert NewModel:DecayParticles 2 /Herwig/Particles/~e_R-', 
+            'insert NewModel:DecayParticles 3 /Herwig/Particles/~mu_R-', 
+            'insert NewModel:DecayParticles 4 /Herwig/Particles/~chi_10', 
+            'insert NewModel:DecayParticles 5 /Herwig/Particles/~chi_20', 
+            'insert NewModel:DecayParticles 6 /Herwig/Particles/~chi_2+'),
         configFiles = cms.vstring(),
-        dumpEvents = cms.untracked.string(''),
-        dumpConfig = cms.untracked.string(''),
         parameterSets = cms.vstring('pdfCTEQ5L', 
             'basicSetup', 
             'cm10TeV', 
@@ -153,7 +174,7 @@ process.generator = cms.EDProducer("LHEProducer",
         generator = cms.string('ThePEG')
     )
 )
-process.ProducerSourceSequence = cms.Sequence(process.generator)
+process.ProductionFilterSequence = cms.Sequence(process.generator)
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
@@ -170,41 +191,12 @@ process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.endjob_step,process.out_step])
 # special treatment in case of production filter sequence  
 for path in process.paths: 
-    getattr(process,path)._seq = process.ProducerSourceSequence*getattr(process,path)._seq
+    getattr(process,path)._seq = process.ProductionFilterSequence*getattr(process,path)._seq
 
 
 # Automatic addition of the customisation function
-from GeneratorInterface.ThePEGInterface.herwigDefaults_cff import *
 
 def customise(process):
-	process.RandomNumberGeneratorService.generator = \
-		process.RandomNumberGeneratorService.theSource
-
-	for i in [
-		'genParticles.src',
-		'genParticleCandidates.src',
-		'genEventWeight.src',
-		'genEventScale.src',
-		'genEventPdfInfo.src',
-		'genEventProcID.src',
-		'VtxSmeared.src',
-		'g4SimHits.Generator.HepMCProductLabel',
-		'famosSimHits.SourceLabel'
-	]:
-		try:
-			obj = reduce(lambda x, y: getattr(x, y),
-			             i.split('.')[:-1], process)
-			setattr(obj, i.split('.')[-1], 'generator')
-		except:
-			pass
-
-        try:
-                process.mergedtruth.HepMCDataLabels.append('generator')
-        except:
-                pass
-
-	process.output.outputCommands.append('keep *_generator_*_*')
-
 	process.genParticles.abortOnUnknownPDGCode = False
 
 	return process

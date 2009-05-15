@@ -1,8 +1,8 @@
 # Auto generated configuration file
 # using: 
-# Revision: 1.108 
+# Revision: 1.115 
 # Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-# with command line options: GeneratorInterface/ThePEGInterface/testThePEGSource -s GEN --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_30X::All --no_exec --customise=GeneratorInterface/ThePEGInterface/customSource
+# with command line options: Configuration/GenProduction/testThePEGSource -s GEN --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_31X::All --no_exec --mc --customise=Configuration/GenProduction/custom
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('GEN')
@@ -20,7 +20,7 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.2 $'),
+    version = cms.untracked.string('$Revision: 1.3 $'),
     annotation = cms.untracked.string('Herwig++ example - QCD events, MRST2001 used, MinKT=1400 GeV'),
     name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGSource.py,v $')
 )
@@ -60,7 +60,11 @@ process.source = cms.Source("ThePEGSource",
         'insert LHEHandler:LesHouchesReaders 0 LHEReader', 
         'cd /Herwig/Generators', 
         'set LHCGenerator:EventHandler /Herwig/EventHandlers/LHEHandler', 
+        'cd /Herwig/Shower', 
+        'set Evolver:HardVetoScaleSource Read', 
+        'set Evolver:MECorrMode No', 
         'cd /'),
+    usePthatEventScale = cms.bool(True),
     cmsDefaults = cms.vstring('+pdfMRST2001', 
         '+basicSetup', 
         '+cm14TeV', 
@@ -113,18 +117,28 @@ process.source = cms.Source("ThePEGSource",
         'cp CTEQ6L1 /cmsPDFSet', 
         'cd /'),
     eventsToPrint = cms.untracked.uint32(1),
-    dumpConfig = cms.untracked.string(''),
-    dumpEvents = cms.untracked.string(''),
-    QCDParameters = cms.vstring('cd /Herwig/MatrixElements/', 
+    dumpConfig = cms.untracked.string('dump.config'),
+    dumpEvents = cms.untracked.string('dump.hepmc'),
+    validationQCD = cms.vstring('cd /Herwig/MatrixElements/', 
         'insert SimpleQCD:MatrixElements[0] MEQCD2to2', 
         'cd /', 
-        'set /Herwig/Cuts/JetKtCut:MinKT 1400*GeV', 
+        'set /Herwig/Cuts/JetKtCut:MinKT 50*GeV', 
+        'set /Herwig/Cuts/JetKtCut:MaxKT 51*GeV', 
         'set /Herwig/UnderlyingEvent/MPIHandler:Algorithm 1'),
-    filterEfficiency = cms.untracked.double(1.0),
+    validationMSSM = cms.vstring('cd /Herwig/NewPhysics', 
+        'set HPConstructor:IncludeEW No', 
+        'set TwoBodyDC:CreateDecayModes No', 
+        'setup MSSM/Model ${HERWIGPATH}/SPhenoSPS1a.spc', 
+        'insert NewModel:DecayParticles 0 /Herwig/Particles/~d_L', 
+        'insert NewModel:DecayParticles 1 /Herwig/Particles/~u_L', 
+        'insert NewModel:DecayParticles 2 /Herwig/Particles/~e_R-', 
+        'insert NewModel:DecayParticles 3 /Herwig/Particles/~mu_R-', 
+        'insert NewModel:DecayParticles 4 /Herwig/Particles/~chi_10', 
+        'insert NewModel:DecayParticles 5 /Herwig/Particles/~chi_20', 
+        'insert NewModel:DecayParticles 6 /Herwig/Particles/~chi_2+'),
     configFiles = cms.vstring(),
-    crossSection = cms.untracked.double(1.84505e-07),
     parameterSets = cms.vstring('cmsDefaults', 
-        'QCDParameters')
+        'validationQCD')
 )
 
 # Output definition
@@ -143,7 +157,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.GlobalTag.globaltag = 'IDEAL_30X::All'
+process.GlobalTag.globaltag = 'IDEAL_31X::All'
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
