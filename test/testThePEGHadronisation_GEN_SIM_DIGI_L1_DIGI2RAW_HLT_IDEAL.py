@@ -26,8 +26,8 @@ process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
     version = cms.untracked.string('$Revision: 1.3 $'),
-    annotation = cms.untracked.string('LHE example - ttbar events, MRST2001 used'),
-    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGHadronisation_GEN_SIM_DIGI_L1_DIGI2RAW_HLT_IDEAL.py,v $')
+    annotation = cms.untracked.string('LHE example - ttbar events'),
+    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGHadronisation.py,v $')
 )
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -150,7 +150,7 @@ process.generator = cms.EDProducer("LHEProducer",
             'insert SimpleQCD:MatrixElements[0] MEQCD2to2', 
             'cd /', 
             'set /Herwig/Cuts/JetKtCut:MinKT 50*GeV', 
-            'set /Herwig/Cuts/JetKtCut:MaxKT 51*GeV', 
+            'set /Herwig/Cuts/JetKtCut:MaxKT 100*GeV', 
             'set /Herwig/UnderlyingEvent/MPIHandler:Algorithm 1'),
         validationMSSM = cms.vstring('cd /Herwig/NewPhysics', 
             'set HPConstructor:IncludeEW No', 

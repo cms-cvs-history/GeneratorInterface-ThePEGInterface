@@ -20,9 +20,9 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.3 $'),
-    annotation = cms.untracked.string('Herwig++ example - QCD events, MRST2001 used, MinKT=1400 GeV'),
-    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGGeneratorFilter_GEN_IDEAL.py,v $')
+    version = cms.untracked.string('$Revision: 1.2 $'),
+    annotation = cms.untracked.string('Herwig++ example - QCD validation'),
+    name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGGeneratorFilter.py,v $')
 )
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100)
@@ -141,7 +141,7 @@ process.generator = cms.EDProducer("ThePEGGeneratorFilter",
         'insert SimpleQCD:MatrixElements[0] MEQCD2to2', 
         'cd /', 
         'set /Herwig/Cuts/JetKtCut:MinKT 50*GeV', 
-        'set /Herwig/Cuts/JetKtCut:MaxKT 51*GeV', 
+        'set /Herwig/Cuts/JetKtCut:MaxKT 100*GeV', 
         'set /Herwig/UnderlyingEvent/MPIHandler:Algorithm 1'),
     validationMSSM = cms.vstring('cd /Herwig/NewPhysics', 
         'set HPConstructor:IncludeEW No', 
