@@ -1,8 +1,8 @@
 # Auto generated configuration file
 # using: 
-# Revision: 1.115 
-# Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-# with command line options: Configuration/GenProduction/testThePEGGeneratorFilter -s GEN:ProductionFilterSequence --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_31X::All --no_exec --mc --customise=Configuration/GenProduction/custom
+# Revision: 1.149 
+# Source: /cvs/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
+# with command line options: Configuration/GenProduction/testThePEGGeneratorFilter -s GEN --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,MC_31X_V9::All --no_exec --mc --customise=Configuration/GenProduction/custom
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('GEN')
@@ -11,7 +11,7 @@ process = cms.Process('GEN')
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('FWCore/MessageService/MessageLogger_cfi')
 process.load('Configuration/StandardSequences/MixingNoPileUp_cff')
-process.load('Configuration/StandardSequences/GeometryIdeal_cff')
+process.load('Configuration/StandardSequences/GeometryExtended_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/Generator_cff')
 process.load('Configuration/StandardSequences/VtxSmearedEarly10TeVCollision_cff')
@@ -20,7 +20,7 @@ process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.2 $'),
+    version = cms.untracked.string('$Revision: 1.3 $'),
     annotation = cms.untracked.string('Herwig++ example - QCD validation'),
     name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGGeneratorFilter.py,v $')
 )
@@ -35,6 +35,7 @@ process.source = cms.Source("EmptySource")
 
 # Output definition
 process.output = cms.OutputModule("PoolOutputModule",
+    splitLevel = cms.untracked.int32(0),
     outputCommands = process.RAWSIMEventContent.outputCommands,
     fileName = cms.untracked.string('testThePEGGeneratorFilter_GEN.root'),
     dataset = cms.untracked.PSet(
@@ -49,7 +50,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.GlobalTag.globaltag = 'IDEAL_31X::All'
+process.GlobalTag.globaltag = 'MC_31X_V9::All'
 process.generator = cms.EDProducer("ThePEGGeneratorFilter",
     cm10TeV = cms.vstring('set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 10000.0', 
         'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.1*GeV'),
@@ -92,6 +93,13 @@ process.generator = cms.EDProducer("ThePEGGeneratorFilter",
         'set LHEReader:PDFB /cmsPDFSet', 
         'cd /'),
     pdfMRST2001 = cms.vstring('cp /Herwig/Partons/MRST /cmsPDFSet'),
+    reweightPthat = cms.vstring('mkdir /Herwig/Weights', 
+        'cd /Herwig/Weights', 
+        'create ThePEG::ReweightMinPT reweightMinPT ReweightMinPT.so', 
+        'cd /', 
+        'set /Herwig/Weights/reweightMinPT:Power 4.5', 
+        'set /Herwig/Weights/reweightMinPT:Scale 15*GeV', 
+        'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightMinPT'),
     generatorModule = cms.string('/Herwig/Generators/LHCGenerator'),
     eventHandlers = cms.string('/Herwig/EventHandlers'),
     basicSetup = cms.vstring('cd /Herwig/Generators', 
@@ -134,6 +142,14 @@ process.generator = cms.EDProducer("ThePEGGeneratorFilter",
         'set CTEQ6L1:RemnantHandler /Herwig/Partons/HadronRemnants', 
         'cp CTEQ6L1 /cmsPDFSet', 
         'cd /'),
+    cm7TeV = cms.vstring('set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 7000.0', 
+        'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.0*GeV'),
+    reweightConstant = cms.vstring('mkdir /Herwig/Weights', 
+        'cd /Herwig/Weights', 
+        'create ThePEG::ReweightConstant reweightConstant ReweightConstant.so', 
+        'cd /', 
+        'set /Herwig/Weights/reweightConstant:C 1', 
+        'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightConstant'),
     eventsToPrint = cms.untracked.uint32(1),
     dumpConfig = cms.untracked.string('dump.config'),
     dumpEvents = cms.untracked.string('dump.hepmc'),

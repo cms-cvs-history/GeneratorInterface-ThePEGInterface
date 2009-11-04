@@ -1,26 +1,31 @@
 # Auto generated configuration file
 # using: 
-# Revision: 1.115 
-# Source: /cvs_server/repositories/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
-# with command line options: Configuration/GenProduction/testThePEGHadronisation -s GEN:ProductionFilterSequence --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,IDEAL_31X::All --no_exec --mc --customise=Configuration/GenProduction/custom
+# Revision: 1.149 
+# Source: /cvs/CMSSW/CMSSW/Configuration/PyReleaseValidation/python/ConfigBuilder.py,v 
+# with command line options: Configuration/GenProduction/testThePEGHadronisation -s GEN,SIM,DIGI,L1,DIGI2RAW,HLT --datatier GEN -n 100 --eventcontent RAWSIM --conditions FrontierConditions_GlobalTag,MC_31X_V9::All --no_exec --mc --customise=Configuration/GenProduction/custom
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process('GEN')
+process = cms.Process('HLT')
 
 # import of standard configurations
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('FWCore/MessageService/MessageLogger_cfi')
 process.load('Configuration/StandardSequences/MixingNoPileUp_cff')
-process.load('Configuration/StandardSequences/GeometryIdeal_cff')
+process.load('Configuration/StandardSequences/GeometryExtended_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/Generator_cff')
 process.load('Configuration/StandardSequences/VtxSmearedEarly10TeVCollision_cff')
+process.load('Configuration/StandardSequences/Sim_cff')
+process.load('Configuration/StandardSequences/Digi_cff')
+process.load('Configuration/StandardSequences/SimL1Emulator_cff')
+process.load('Configuration/StandardSequences/DigiToRaw_cff')
+process.load('HLTrigger/Configuration/HLT_1E31_cff')
 process.load('Configuration/StandardSequences/EndOfProcess_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 
 process.configurationMetadata = cms.untracked.PSet(
-    version = cms.untracked.string('$Revision: 1.3 $'),
+    version = cms.untracked.string('$Revision: 1.4 $'),
     annotation = cms.untracked.string('LHE example - ttbar events'),
     name = cms.untracked.string('$Source: /cvs_server/repositories/CMSSW/CMSSW/GeneratorInterface/ThePEGInterface/test/testThePEGHadronisation.py,v $')
 )
@@ -37,8 +42,9 @@ process.source = cms.Source("LHESource",
 
 # Output definition
 process.output = cms.OutputModule("PoolOutputModule",
+    splitLevel = cms.untracked.int32(0),
     outputCommands = process.RAWSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('testThePEGHadronisation_GEN.root'),
+    fileName = cms.untracked.string('testThePEGHadronisation_GEN_SIM_DIGI_L1_DIGI2RAW_HLT.root'),
     dataset = cms.untracked.PSet(
         dataTier = cms.untracked.string('GEN'),
         filterName = cms.untracked.string('')
@@ -51,7 +57,7 @@ process.output = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.GlobalTag.globaltag = 'IDEAL_31X::All'
+process.GlobalTag.globaltag = 'MC_31X_V9::All'
 process.generator = cms.EDProducer("LHEProducer",
     eventsToPrint = cms.untracked.uint32(1),
     hadronisation = cms.PSet(
@@ -96,6 +102,13 @@ process.generator = cms.EDProducer("LHEProducer",
             'set LHEReader:PDFB /cmsPDFSet', 
             'cd /'),
         pdfMRST2001 = cms.vstring('cp /Herwig/Partons/MRST /cmsPDFSet'),
+        reweightPthat = cms.vstring('mkdir /Herwig/Weights', 
+            'cd /Herwig/Weights', 
+            'create ThePEG::ReweightMinPT reweightMinPT ReweightMinPT.so', 
+            'cd /', 
+            'set /Herwig/Weights/reweightMinPT:Power 4.5', 
+            'set /Herwig/Weights/reweightMinPT:Scale 15*GeV', 
+            'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightMinPT'),
         generatorModule = cms.string('/Herwig/Generators/LHCGenerator'),
         eventHandlers = cms.string('/Herwig/EventHandlers'),
         basicSetup = cms.vstring('cd /Herwig/Generators', 
@@ -138,6 +151,14 @@ process.generator = cms.EDProducer("LHEProducer",
             'set CTEQ6L1:RemnantHandler /Herwig/Partons/HadronRemnants', 
             'cp CTEQ6L1 /cmsPDFSet', 
             'cd /'),
+        cm7TeV = cms.vstring('set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 7000.0', 
+            'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.0*GeV'),
+        reweightConstant = cms.vstring('mkdir /Herwig/Weights', 
+            'cd /Herwig/Weights', 
+            'create ThePEG::ReweightConstant reweightConstant ReweightConstant.so', 
+            'cd /', 
+            'set /Herwig/Weights/reweightConstant:C 1', 
+            'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightConstant'),
         eventsToPrint = cms.untracked.uint32(1),
         dumpConfig = cms.untracked.string('dump.config'),
         dumpEvents = cms.untracked.string('dump.hepmc'),
@@ -172,12 +193,17 @@ process.ProductionFilterSequence = cms.Sequence(process.generator)
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
+process.simulation_step = cms.Path(process.psim)
+process.digitisation_step = cms.Path(process.pdigi)
+process.L1simulation_step = cms.Path(process.SimL1Emulator)
+process.digi2raw_step = cms.Path(process.DigiToRaw)
 process.endjob_step = cms.Path(process.endOfProcess)
 process.out_step = cms.EndPath(process.output)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.generation_step,process.endjob_step,process.out_step)
-
+process.schedule = cms.Schedule(process.generation_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step)
+process.schedule.extend(process.HLTSchedule)
+process.schedule.extend([process.endjob_step,process.out_step])
 # special treatment in case of production filter sequence  
 for path in process.paths: 
     getattr(process,path)._seq = process.ProductionFilterSequence*getattr(process,path)._seq
