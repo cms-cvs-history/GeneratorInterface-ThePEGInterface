@@ -32,6 +32,7 @@ herwigDefaultsBlock = cms.PSet(
 		'cd /',
 	),
 
+	# Default pdf for Herwig++ 2.3
 	pdfMRST2001 = cms.vstring(
 		'cp /Herwig/Partons/MRST /cmsPDFSet'
 	),	
@@ -54,6 +55,10 @@ herwigDefaultsBlock = cms.PSet(
 		'cd /',
 	),
 
+	cm7TeV = cms.vstring(
+		'set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 7000.0',
+		'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.0*GeV',
+	),
 	cm10TeV = cms.vstring(
 		'set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 10000.0',
 		'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.1*GeV',
@@ -61,6 +66,41 @@ herwigDefaultsBlock = cms.PSet(
 	cm14TeV = cms.vstring(
 		'set /Herwig/Generators/LHCGenerator:EventHandler:LuminosityFunction:Energy 14000.0',
 		'set /Herwig/Shower/Evolver:IntrinsicPtGaussian 2.2*GeV',
+	),
+
+	# UE Tune from Herwig++ 2.3
+	ueLO = cms.vstring(
+		'cd /Herwig/UnderlyingEvent',
+		'set KtCut:MinKT 4.0',
+		'set UECuts:MHatMin 8.0',
+		'set MPIHandler:InvRadius 1.5',
+		'cd /'
+	),
+	# UE Tune from Herwig++ 2.4 - with LO** pdf
+	ueLOs = cms.vstring(
+		'cd /Herwig/UnderlyingEvent',
+		'set KtCut:MinKT 4.3',
+		'set UECuts:MHatMin 8.6',
+		'set MPIHandler:InvRadius 1.2',
+		'cd /'
+	),
+
+	reweightConstant = cms.vstring(
+		'mkdir /Herwig/Weights',
+		'cd /Herwig/Weights',
+		'create ThePEG::ReweightConstant reweightConstant ReweightConstant.so',
+		'cd /',
+		'set /Herwig/Weights/reweightConstant:C 1',
+		'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightConstant',
+	),
+	reweightPthat = cms.vstring(
+		'mkdir /Herwig/Weights',
+		'cd /Herwig/Weights',
+		'create ThePEG::ReweightMinPT reweightMinPT ReweightMinPT.so',
+		'cd /',
+		'set /Herwig/Weights/reweightMinPT:Power 4.5',
+		'set /Herwig/Weights/reweightMinPT:Scale 15*GeV',
+		'insert SimpleQCD:Reweights[0] /Herwig/Weights/reweightMinPT',
 	),
 
 	setParticlesStableForDetector = cms.vstring(
